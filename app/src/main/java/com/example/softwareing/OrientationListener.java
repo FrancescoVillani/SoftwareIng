@@ -1,4 +1,4 @@
-package com.example.ingegneriadelsoftware;
+package com.example.softwareing;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
