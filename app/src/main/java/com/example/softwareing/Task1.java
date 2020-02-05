@@ -146,14 +146,14 @@ public class Task1 extends AppCompatActivity {
 
         log.append("\n---resetting gyroscope :D---");
         try {
-            Thread.sleep(300);
+            Thread.sleep(200);
         } catch (InterruptedException e) {
             e.printStackTrace();
             Log.i("error", "LA PRIMA SLEEP è STRONZA");
         }
         this.my_angle = orientation.getRotation();
         try {
-            Thread.sleep(300);
+            Thread.sleep(200);
         } catch (InterruptedException e) {
             e.printStackTrace();
             Log.i("error", "LA PRIMA SLEEP è STRONZA");
@@ -311,7 +311,7 @@ public class Task1 extends AppCompatActivity {
 
     /* Muove il robot di 90 gradi e chiama restore_direction */
     private void rotazione_plus_90(EV3.Api api) {
-
+        resetGiroscope();
         this.my_angle = (this.my_angle + 90) % 360;
         log.append("\ngiro a destra verso l'angolo:" + this.my_angle);
         //this.orientamento = (int) mod(this.orientamento+1, 4) == 0 ? 4 : (int) mod(this.orientamento+1, 4);
@@ -337,7 +337,7 @@ public class Task1 extends AppCompatActivity {
 
     /* Muove il robot di -90 gradi e chiama restore_direction */
     private void rotazione_minus_90(EV3.Api api) {
-
+        resetGiroscope();
         this.my_angle = mod((this.my_angle - 90),360);
         log.append("\ngiro a sinistra verso l'angolo:" + this.my_angle);
         //this.orientamento = (int) mod(this.orientamento-1, 4) == 0 ? 4 : (int) mod(this.orientamento-1, 4);
@@ -368,7 +368,7 @@ public class Task1 extends AppCompatActivity {
     private void meta_casella_avanti(EV3.Api api) {
 
         int movimenti = 0;
-        int power = 350;
+        int power = 360;
         int acc = 300;
         int adjust_dx = 0;
         int adjust_sx = 0;
@@ -419,6 +419,106 @@ public class Task1 extends AppCompatActivity {
 
 
     /*------------------------------------ALGORITMI VARI-----------------------------------------*/
+    int orientamento;
+    int contatore;
+
+    public void setCampo() {
+        /*setto il contatore*/
+        contatore = 1;
+        /* setto l'orientamento */
+        if(my_row == 0) //Watching SOUTH
+            this.orientamento = 2;
+        else if (my_row == this.ROW -1)//Watching NORTH
+            this.orientamento = 0;
+        else if (my_col == 0)//Watching EST
+            this.orientamento = 1;
+        else//Watching WEST
+            this.orientamento = 3;
+
+        //se sto guardando verso sud
+        if(this.orientamento == 3){
+            for(int i = this.my_col; i < this.COL; ++i)
+                campo[0][i] = contatore++;
+            for(int i = this.my_col-1; i >= 0; --i)
+                campo[0][i] = contatore++;
+
+            for(int i = 1; i < this.ROW; ++i){
+                /*pari verso sinistra e dispari verso destra*/
+                if(i % 2 == 0){
+                    for(int j = this.COL -1; j >= 0; --j)
+                        campo[i][j] = contatore++;
+                }
+                else{
+                    for(int j = 0; j < this.COL; ++j)
+                        campo[i][j] = contatore++;
+                }
+            }
+
+        }
+
+        //se sto guardando verso est
+        else if(this.orientamento == 2) {
+            for (int i = this.my_row; i >= 0; --i)
+                campo[i][0] = contatore++;
+            for (int i = this.my_row+1; i < this.ROW; ++i)
+                campo[i][0] = contatore++;
+            for (int i = this.my_col + 1; i < this.COL; ++i) {
+                /*dispari verso su e pari verso giù*/
+                if (i % 2 != 0) {
+                    for (int j = this.ROW - 1; j >= 0; --j)
+                        campo[j][i] = contatore++;
+                } else {
+                    for (int j = 0; j < this.ROW; ++j)
+                        campo[j][i] = contatore++;
+                }
+            }
+
+        }
+
+        //se sto guardando verso nord
+        else if(this.orientamento == 1){
+            for(int i = this.my_col; i >= 0; --i)
+                campo[this.my_row][0] = contatore++;
+            for(int i = this.my_col+1; i < this.COL; ++i)
+                campo[this.my_row][0] = contatore++;
+            for(int i = this.my_row -1; i >= 0; --i){
+                /*pari verso destra e dispari verso sinistra, però devo stare attento al numero di righe che ho*/
+                if((i+this.ROW) % 2 == 0){
+                    for(int j = this.COL -1; j >= 0; --j)
+                        campo[i][j] = contatore++;
+                }
+                else{
+                    for(int j = 0; j < this.COL; ++j)
+                        campo[i][j] = contatore++;
+                }
+            }
+
+        }
+
+        //se sto guardando verso ovest
+        else {
+            for (int i = this.my_row; i < this.ROW; ++i)
+                campo[i][this.my_col] = contatore++;
+            for(int i = this.my_row-1; i >= 0; --i)
+                campo[i][this.my_col] = contatore++;
+            for (int i = this.my_col - 1; i >= 0; --i) {
+                /*pari verso su e dispari verso giù, però devo stare attento al numero di righe che ho*/
+                if ((i+this.COL) % 2 != 0) {
+                    for (int j = this.ROW - 1; j >= 0; --j)
+                        campo[j][i] = contatore++;
+                } else {
+                    for (int j = 0; j < this.ROW; ++j)
+                        campo[j][i] = contatore++;
+                }
+            }
+
+
+        }
+
+
+    }
+
+    /*------------------------------------ALGORITMI VARI-----------------------------------------*/
     /* programma effettivo */
     private void complete_task1(EV3.Api api) {
         this.my_angle = orientation.getRotation();
@@ -430,25 +530,8 @@ public class Task1 extends AppCompatActivity {
             Log.i("error", "LA PRIMA SLEEP è STRONZA");
         }
 
-        for(int i = 0; i < 1; ++i) {
-            casella_avanti(api);
-            casella_avanti(api);
-            casella_avanti(api);
-            casella_avanti(api);
-            resetGiroscope();
-        }
 
-        rotazione_plus_90(api);
-        rotazione_plus_90(api);
-        resetGiroscope();
 
-        for(int i = 0; i < 1; ++i) {
-            casella_avanti(api);
-            casella_avanti(api);
-            casella_avanti(api);
-            casella_avanti(api);
-            resetGiroscope();
-        }
 
     }
 
