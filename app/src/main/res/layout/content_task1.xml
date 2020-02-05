@@ -14,23 +14,23 @@
         android:layout_height="wrap_content"
         android:text="Sei in task1!"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.083"
+        app:layout_constraintHorizontal_bias="0.047"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.024" />
 
     <Button
+        android:id="@+id/task1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Avvia Task1"
-        android:id="@+id/task1"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.049"
+        app:layout_constraintHorizontal_bias="0.063"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.076" />
+        app:layout_constraintVertical_bias="0.078" />
 
     <EditText
         android:id="@+id/input_row"
@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:ems="5"
         android:inputType="number"
-        android:text="totR"
+        android:hint="totR"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.052"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -52,7 +52,7 @@
         android:layout_height="wrap_content"
         android:ems="5"
         android:inputType="number"
-        android:text="totC"
+        android:hint="totC"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.288"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -78,7 +78,7 @@
         android:layout_height="41dp"
         android:ems="5"
         android:inputType="number"
-        android:text="startR"
+        android:hint="startR"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.052"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -92,7 +92,7 @@
         android:layout_height="44dp"
         android:ems="5"
         android:inputType="number"
-        android:text="startC"
+        android:hint="startC"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.288"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -118,7 +118,7 @@
         android:layout_height="wrap_content"
         android:ems="5"
         android:inputType="number"
-        android:text="Balls"
+        android:hint="Balls"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.052"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -141,26 +141,28 @@
 
     <TextView
         android:id="@+id/giro"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="143dp"
+        android:layout_height="18dp"
         android:text="Giroscopio"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.056"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/log"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Log:"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.055"
+        app:layout_constraintHorizontal_bias="0.07"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.55" />
+        app:layout_constraintVertical_bias="0.499" />
+
+    <TextView
+        android:id="@+id/log"
+        android:layout_width="357dp"
+        android:layout_height="162dp"
+        android:scrollbars="vertical"
+        android:text="Log:"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.351"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.727" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
