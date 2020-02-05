@@ -314,7 +314,7 @@ public class Task1 extends AppCompatActivity {
         resetGiroscope();
         this.my_angle = (this.my_angle + 90) % 360;
         log.append("\ngiro a destra verso l'angolo:" + this.my_angle);
-        //this.orientamento = (int) mod(this.orientamento+1, 4) == 0 ? 4 : (int) mod(this.orientamento+1, 4);
+        this.orientamento = (int) mod(this.orientamento+1, 4);
 
         /*applica una Velocita per un certo numero di millisecondi tot = step1 + step2 + step3 */
         //log.append("mi ruoto di 90 gradi in senso orario");
@@ -340,7 +340,7 @@ public class Task1 extends AppCompatActivity {
         resetGiroscope();
         this.my_angle = mod((this.my_angle - 90),360);
         log.append("\ngiro a sinistra verso l'angolo:" + this.my_angle);
-        //this.orientamento = (int) mod(this.orientamento-1, 4) == 0 ? 4 : (int) mod(this.orientamento-1, 4);
+        this.orientamento = (int) mod(this.orientamento-1, 4);
 
         applyMotorDx((m) -> {
             m.waitCompletion();
@@ -422,6 +422,17 @@ public class Task1 extends AppCompatActivity {
     int orientamento;
     int contatore;
 
+    public void logCampo(){
+        String string = "";
+        for(int i = 0; i < ROW; i++){
+            for(int j = 0; j < COL; j++){
+                string += campo[i][j] + "   ";
+            }
+            Log.i("mytag",string);
+            string = "";
+        }
+    }
+
     public void setCampo() {
         /*setto il contatore*/
         contatore = 1;
@@ -436,7 +447,7 @@ public class Task1 extends AppCompatActivity {
             this.orientamento = 3;
 
         //se sto guardando verso sud
-        if(this.orientamento == 3){
+        if(this.orientamento == 2){
             for(int i = this.my_col; i < this.COL; ++i)
                 campo[0][i] = contatore++;
             for(int i = this.my_col-1; i >= 0; --i)
@@ -453,11 +464,10 @@ public class Task1 extends AppCompatActivity {
                         campo[i][j] = contatore++;
                 }
             }
-
         }
 
         //se sto guardando verso est
-        else if(this.orientamento == 2) {
+        else if(this.orientamento == 1) {
             for (int i = this.my_row; i >= 0; --i)
                 campo[i][0] = contatore++;
             for (int i = this.my_row+1; i < this.ROW; ++i)
@@ -472,11 +482,10 @@ public class Task1 extends AppCompatActivity {
                         campo[j][i] = contatore++;
                 }
             }
-
         }
 
         //se sto guardando verso nord
-        else if(this.orientamento == 1){
+        else if(this.orientamento == 0){
             for(int i = this.my_col; i >= 0; --i)
                 campo[this.my_row][0] = contatore++;
             for(int i = this.my_col+1; i < this.COL; ++i)
@@ -492,7 +501,6 @@ public class Task1 extends AppCompatActivity {
                         campo[i][j] = contatore++;
                 }
             }
-
         }
 
         //se sto guardando verso ovest
@@ -511,28 +519,101 @@ public class Task1 extends AppCompatActivity {
                         campo[j][i] = contatore++;
                 }
             }
-
-
         }
+    }
 
+    /* Capisce com'è in base alla destinazione e ritorna la mossa da fare*/
+    private int capisci_mossa(int row_dest, int col_dest) {
+        int mov;
+        if (row_dest < this.my_row) {
+            mov = (int) mod(0 - this.orientamento, 4); // row_dest e' a NORD
+            log.append("\nla mossa da fare è: " + mov + " ");
+            return mov;
+        }
+        else if (row_dest > this.my_row) {
+            mov = (int) mod( 2 - this.orientamento ,4); // row_dest e' a SUD
+            log.append("\nla mossa da fare è: " + mov + " ");
+            return mov;
+        }
+        else if (col_dest > this.my_col) {
+            mov = (int) mod(1 - this.orientamento,4); // col_dest e' a EST
+            log.append("\nla mossa da fare è: " + mov + " ");
+            return mov;
+        }
+        else{
+            mov = (int) mod(3 - this.orientamento,4); // col_dest e' a OVEST
+            log.append("\nla mossa da fare è: " + mov + " ");
+            return mov;
+        }
+    }
+
+    private void registra_movimento(){
+        if (orientamento == 0)
+            my_row++;
+        else if(orientamento == 2)
+            my_row--;
+        else if(orientamento == 1)
+            my_col++;
+        else
+            my_col--;
+        log.append("\nsono in posizione: " + my_row + " " + my_col);
 
     }
+
+    private void esegui_mossa(EV3.Api api, int mossa){
+        if(mossa == 0){
+            casella_avanti(api);
+            registra_movimento();
+        }
+        else if(mossa == 1){
+            rotazione_plus_90(api);
+            casella_avanti(api);
+            registra_movimento();
+        }
+        else if(mossa == 2){
+            rotazione_plus_90(api);
+            rotazione_plus_90(api);
+            casella_avanti(api);
+            registra_movimento();
+        }
+        else{
+            rotazione_minus_90(api);
+            casella_avanti(api);
+            registra_movimento();
+        }
+    }
+
+    void algoritmo_zigzag(EV3.Api api){ }
+
+    void algoritmo_ritorno_inizio(EV3.Api api){}
+
+    void  algoritmo_ritorno_casella(EV3.Api api){}
+
 
     /*------------------------------------ALGORITMI VARI-----------------------------------------*/
+
+    int azione = 0;
+    int ultima_bomba = 1;
     /* programma effettivo */
     private void complete_task1(EV3.Api api) {
-        this.my_angle = orientation.getRotation();
+        setCampo();
+        resetGiroscope();
 
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            Log.i("error", "LA PRIMA SLEEP è STRONZA");
+        while(tot_balls > 0){
+            if(azione == 0){
+                algoritmo_zigzag(api);
+            }
+            else if(azione == 1){
+                algoritmo_ritorno_inizio(api);
+            }
+            else{
+                algoritmo_ritorno_casella(api);
+            }
         }
 
-
-
-
+        log.append("FINITO!");
     }
+
+
 
 }
