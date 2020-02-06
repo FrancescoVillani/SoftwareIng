@@ -15,14 +15,12 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
-import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -62,7 +60,6 @@ public class Task1 extends AppCompatActivity {
         double result = x % y;
         return result < 0? result + y : result;
     }
-
 
     private void legoMain(EV3.Api api) {
         /* Motor Setup */
@@ -147,33 +144,22 @@ public class Task1 extends AppCompatActivity {
 
 
     private void resetGiroscope(){
-        orientation =new OrientationListener(sensorManager);
+        orientation = new OrientationListener(sensorManager);
 
         //log.append("\n---resetting gyroscope :D---");
         try {
             Thread.sleep(200);
         } catch (InterruptedException e) {
             e.printStackTrace();
-            Log.i("error", "errore sleep");
+            Log.i("error", "LA PRIMA SLEEP è STRONZA");
         }
         this.my_angle = orientation.getRotation();
         try {
             Thread.sleep(200);
         } catch (InterruptedException e) {
             e.printStackTrace();
-            Log.i("error", "errore sleep");
+            Log.i("error", "LA PRIMA SLEEP è STRONZA");
         }
-    }
-
-    public void onResume() {
-        super.onResume();
-        sensorManager.registerListener(orientation, orientation.sm_sensor,
-                SensorManager.SENSOR_DELAY_FASTEST);
-    }
-
-    public void onStop() {
-        super.onStop();
-        sensorManager.unregisterListener(orientation);
     }
 
     /* Ritorna la distanza letta dal proximity sensor*/
@@ -201,6 +187,9 @@ public class Task1 extends AppCompatActivity {
 
     /* log for see all actions */
     private TextView log;
+
+    /* per il print del campo */
+    private TextView printMatrix;
 
     /* motori */
     private TachoMotor motorDx;
@@ -278,6 +267,9 @@ public class Task1 extends AppCompatActivity {
         start_row = (EditText) findViewById(R.id.start_row);
         start_col = (EditText) findViewById(R.id.start_col);
 
+        /* Per il print di tutto il campo */
+        printMatrix = findViewById(R.id.printcampo);
+
         try {
             /* Connessione al Robot */
             BluetoothConnection.BluetoothChannel conn = new BluetoothConnection("k3k").connect();
@@ -318,12 +310,12 @@ public class Task1 extends AppCompatActivity {
 
             int finalFlag = flag;
             applyMotorDx((m) -> {
-                m.setPower(16*(-finalFlag));
+                m.setPower(10*(-finalFlag));
                 // m.setStepPower(-50,20,200,20,false);
                 m.start();
             });
             applyMotorSx((m) -> {
-                m.setPower(16*(finalFlag));
+                m.setPower(10*(finalFlag));
                 //m.setStepPower(50,20,200,20,false);
                 m.start();
 
@@ -399,12 +391,11 @@ public class Task1 extends AppCompatActivity {
     private void casella_avanti(EV3.Api api) {
         meta_casella_avanti(api);
         meta_casella_avanti(api);
-        //resetGiroscope();
     }
     private void meta_casella_avanti(EV3.Api api) {
 
         int movimenti = 0;
-        int power = 368;
+        int power = 360;
         int acc = 300;
         int adjust_dx = 0;
         int adjust_sx = 0;
@@ -416,9 +407,9 @@ public class Task1 extends AppCompatActivity {
         while (movimenti < 2) {
             if( (mod(-flag*(angle-my_angle),360) > offset)) {
                 if (flag == -1) {
-                    adjust_dx = 2 * (int) Math.abs(Math.abs(angle) - Math.abs(my_angle));
+                    adjust_dx = 3 * (int) Math.abs(Math.abs(angle) - Math.abs(my_angle));
                 } else {
-                    adjust_sx = 2 * (int) Math.abs(Math.abs(angle) - Math.abs(my_angle));
+                    adjust_sx = 3 * (int) Math.abs(Math.abs(angle) - Math.abs(my_angle));
                 }
             }
 
@@ -677,7 +668,6 @@ public class Task1 extends AppCompatActivity {
         if(read_proximity_sensor() <= 7){
 
             this.ultima_bomba = this.campo[this.my_row][this.my_col];
-            lista_bombe.add(new Pair(this.my_row, this.my_col));
 
             /* usa il motore di raccolta */
             applyMotorFunctional((m) -> {
@@ -721,7 +711,6 @@ public class Task1 extends AppCompatActivity {
         if(read_proximity_sensor() <= 7){
 
             this.ultima_bomba = this.campo[this.my_row][this.my_col];
-            lista_bombe.add(new Pair(this.my_row, this.my_col));
             log.append("mina trovata alla casella di valore: " + ultima_bomba);
 
             /* usa il motore di raccolta */
@@ -832,17 +821,17 @@ public class Task1 extends AppCompatActivity {
     int azione = 0;
     int highest_visited = 1;
     int ultima_bomba = 1;
-    ArrayList<Pair> lista_bombe = new ArrayList<>();
+    int[][] print_matrix = new int[ROW][COL]; // contiene 1 dove ho trovato una mina, 0 altrimenti
+
     /* programma effettivo */
     private void complete_task1(EV3.Api api) {
-
         highest_visited = 1;
         ultima_bomba = 1;
         azione = 0;
         setCampo();
-        //resetGiroscope();
+        resetGiroscope();
 
-        //apri la pinza
+        /*apri la pinza*/
         applyMotorFunctional((m) -> {
             m.waitCompletion();
             m.waitUntilReady();
@@ -854,12 +843,15 @@ public class Task1 extends AppCompatActivity {
             m.waitUntilReady();
         });
 
+        print_matrix[this.my_row][this.my_col] = 1;
+        printaCampo();
+
 
         while(tot_balls > 0){
             log.append("\nazione da fare: " + azione);
             if(azione == -1){
                 esegui_giramento(api, rilascia_bomba());
-                // usa il motore di raccolta
+                /* usa il motore di raccolta */
                 applyMotorFunctional((m) -> {
                     m.waitCompletion();
                     m.waitUntilReady();
@@ -872,6 +864,10 @@ public class Task1 extends AppCompatActivity {
                 });
                 tot_balls--;
                 azione = 2;
+
+                print_matrix[this.my_row][this.my_col] = 1;
+                printaCampo();
+
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
@@ -891,11 +887,18 @@ public class Task1 extends AppCompatActivity {
             }
         }
 
-        log.append("\nFINITO!\n");
-        for(int i = 0; i < lista_bombe.size(); i++){
-            log.append(lista_bombe.get(i).first + " " + lista_bombe.get(i).second + "\n,l");
+        log.append("FINITO!");
+    }
+
+
+
+    private void printaCampo () {
+
+        for (int i = 0; i < ROW; i++) {
+            for (int j = 0; j < COL; j++) {
+                printMatrix.append("|" +  print_matrix[i][j] + "|");
+            }
+            printMatrix.append("\n");
         }
-
-
     }
 }
