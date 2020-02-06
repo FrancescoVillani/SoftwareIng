@@ -144,7 +144,7 @@ public class Task1 extends AppCompatActivity {
     private void resetGiroscope(){
         orientation =new OrientationListener(sensorManager);
 
-        log.append("\n---resetting gyroscope :D---");
+        //log.append("\n---resetting gyroscope :D---");
         try {
             Thread.sleep(200);
         } catch (InterruptedException e) {
@@ -272,7 +272,7 @@ public class Task1 extends AppCompatActivity {
 
         double angle = (double)Math.round(orientation.getRotation()*100)/100;
         my_angle = (double)Math.round(my_angle*100)/100;
-        double offset = 0.3;
+        double offset = 0.5;
         int flag = (mod((angle - my_angle),360) > 180) ? /*destra : sinistra*/ 1 : -1;
 
         while (mod(-flag*(angle-my_angle),360) > offset){
@@ -313,7 +313,7 @@ public class Task1 extends AppCompatActivity {
     private void rotazione_plus_90(EV3.Api api) {
         resetGiroscope();
         this.my_angle = (this.my_angle + 90) % 360;
-        log.append("\ngiro a destra verso l'angolo:" + this.my_angle);
+        //log.append("\ngiro a destra verso l'angolo:" + this.my_angle);
         this.orientamento = (int) mod(this.orientamento+1, 4);
 
         /*applica una Velocita per un certo numero di millisecondi tot = step1 + step2 + step3 */
@@ -339,7 +339,7 @@ public class Task1 extends AppCompatActivity {
     private void rotazione_minus_90(EV3.Api api) {
         resetGiroscope();
         this.my_angle = mod((this.my_angle - 90),360);
-        log.append("\ngiro a sinistra verso l'angolo:" + this.my_angle);
+        //log.append("\ngiro a sinistra verso l'angolo:" + this.my_angle);
         this.orientamento = (int) mod(this.orientamento-1, 4);
 
         applyMotorDx((m) -> {
@@ -526,7 +526,8 @@ public class Task1 extends AppCompatActivity {
     private int capisci_mossa(int row_dest, int col_dest) {
         int mov;
         if(row_dest == my_row && col_dest == my_col){
-            mov = -1; // row_dest e' a NORD
+            mov = -1;
+            azione = (azione + 1) % 3;
             log.append("\nla mossa da fare è: " + mov + " ");
             return mov;
         }
@@ -590,43 +591,99 @@ public class Task1 extends AppCompatActivity {
     }
 
     private int algoritmo_zigzag(){
+
+
+
         int next_row = this.my_row, next_col = this.my_col;
 
         int startPosX = (this.my_row - 1 < 0) ? this.my_row : this.my_row-1;
-        if(campo[startPosX][my_col] == campo[my_row][my_col]+1){
+        if(campo[startPosX][my_col] == highest_visited+1){
             next_row = startPosX;
             next_col = my_col;
         }
         int startPosY = (this.my_col - 1 < 0) ? this.my_col : this.my_col-1;
-        if(campo[my_row][startPosY]  == campo[my_row][my_col]+1){
+        if(campo[my_row][startPosY]  == highest_visited+1){
             next_row = my_row;
             next_col = startPosY;
         }
         int endPosX =   (this.my_row + 1 > this.ROW-1) ? this.my_row : this.my_row+1;
-        if(campo[endPosX][my_col]  == campo[my_row][my_col]+1){
+        if(campo[endPosX][my_col]  == highest_visited+1){
             next_row = endPosX;
             next_col = my_col;
         }
         int endPosY =   (this.my_col + 1 > this.COL-1) ? this.my_col : this.my_col+1;
-        if(campo[my_row][endPosY]  == campo[my_row][my_col]+1){
+        if(campo[my_row][endPosY]  == highest_visited+1){
             next_row = my_row;
             next_col = endPosY;
         }
-            return capisci_mossa(next_row, next_col);
-
-
+        highest_visited++;
+        log.append("\nhighest visited is now: " + highest_visited);
+        return capisci_mossa(next_row, next_col);
     }
 
-    void algoritmo_ritorno_inizio(){
+    private int algoritmo_ritorno_inizio(){
+        int min_row = this.my_row, min_col = this.my_col;
 
+        int startPosX = (this.my_row - 1 < 0) ? this.my_row : this.my_row-1;
+        if(campo[startPosX][my_col] < campo[min_row][min_col]){
+            min_row = startPosX;
+            min_col = my_col;
+        }
+        int startPosY = (this.my_col - 1 < 0) ? this.my_col : this.my_col-1;
+        if(campo[my_row][startPosY] < campo[min_row][min_col]){
+            min_row = my_row;
+            min_col = startPosY;
+        }
+        int endPosX =   (this.my_row + 1 > this.ROW-1) ? this.my_row : this.my_row+1;
+        if(campo[endPosX][my_col] < campo[min_row][min_col]){
+            min_row = endPosX;
+            min_col = my_col;
+        }
+        int endPosY =   (this.my_col + 1 > this.COL-1) ? this.my_col : this.my_col+1;
+        if(campo[my_row][endPosY] < campo[min_row][min_col]){
+            min_row = my_row;
+            min_col = endPosY;
+        }
+
+        return capisci_mossa(min_row, min_col);
     }
 
-    void  algoritmo_ritorno_casella(){}
+    private int  algoritmo_ritorno_casella(){
+        if (campo[my_row][my_col] == ultima_bomba){
+            return capisci_mossa(my_row, my_col);
+        }
+        else{
+            int max_row = this.my_row, max_col = this.my_col;
+
+            int startPosX = (this.my_row - 1 < 0) ? this.my_row : this.my_row-1;
+            if(campo[startPosX][my_col] > campo[max_row][max_col] && campo[startPosX][my_col] <= highest_visited){
+                max_row = startPosX;
+                max_col = my_col;
+            }
+            int startPosY = (this.my_col - 1 < 0) ? this.my_col : this.my_col-1;
+            if(campo[my_row][startPosY] > campo[max_row][max_col] && campo[my_row][startPosY] <= highest_visited){
+                max_row = my_row;
+                max_col = startPosY;
+            }
+            int endPosX =   (this.my_row + 1 > this.ROW-1) ? this.my_row : this.my_row+1;
+            if(campo[endPosX][my_col] > campo[max_row][max_col] && campo[endPosX][my_col] <= highest_visited){
+                max_row = endPosX;
+                max_col = my_col;
+            }
+            int endPosY =   (this.my_col + 1 > this.COL-1) ? this.my_col : this.my_col+1;
+            if(campo[my_row][endPosY] > campo[max_row][max_col] && campo[my_row][endPosY] <= highest_visited){
+                max_row = my_row;
+                max_col = endPosY;
+            }
+            return capisci_mossa(max_row, max_col);
+        }
+    }
 
 
     /*------------------------------------ALGORITMI VARI-----------------------------------------*/
 
     int azione = 0;
+    int highest_visited = 1;
     int ultima_bomba = 1;
     /* programma effettivo */
     private void complete_task1(EV3.Api api) {
@@ -634,11 +691,14 @@ public class Task1 extends AppCompatActivity {
         resetGiroscope();
 
         while(tot_balls > 0){
+            if(azione == -1){
+
+            }
             if(azione == 0){
                 esegui_mossa(api, algoritmo_zigzag());
             }
             else if(azione == 1){
-                algoritmo_ritorno_inizio();
+                esegui_mossa(api, algoritmo_ritorno_inizio());;
             }
             else{
                 algoritmo_ritorno_casella();
@@ -647,7 +707,4 @@ public class Task1 extends AppCompatActivity {
 
         log.append("FINITO!");
     }
-
-
-
 }
