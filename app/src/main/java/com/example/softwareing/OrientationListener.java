@@ -8,7 +8,7 @@ import android.hardware.SensorManager;
 public class OrientationListener implements SensorEventListener {
 
     private SensorManager sm;
-    private Sensor sm_sensor;
+    public Sensor sm_sensor;
     private final float[] sm_rotation_matrix = new float[16];
     private float[] sm_array = new float[3];
     private double rotation;
