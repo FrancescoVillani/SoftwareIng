@@ -611,6 +611,8 @@ public class Task1 extends AppCompatActivity {
         else
             my_col--;
         log.append("\nsono in posizione: " + my_row + " " + my_col);
+        if(campo[my_row][my_col] > highest_visited)
+            highest_visited++;
 
     }
 
@@ -698,7 +700,7 @@ public class Task1 extends AppCompatActivity {
             next_row = my_row;
             next_col = endPosY;
         }
-        highest_visited++;
+        // sbagliato highest_visited++;
         log.append("\nhighest visited is now: " + highest_visited);
         if(read_proximity_sensor() <= 7){
 
