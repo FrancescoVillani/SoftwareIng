@@ -147,7 +147,7 @@ public class Task1 extends AppCompatActivity {
 
 
     private void resetGiroscope(){
-        orientation = new OrientationListener(sensorManager);
+        orientation =new OrientationListener(sensorManager);
 
         //log.append("\n---resetting gyroscope :D---");
         try {
@@ -201,9 +201,6 @@ public class Task1 extends AppCompatActivity {
 
     /* log for see all actions */
     private TextView log;
-
-    /* per il print del campo */
-    private TextView printMatrix;
 
     /* motori */
     private TachoMotor motorDx;
@@ -280,9 +277,6 @@ public class Task1 extends AppCompatActivity {
         accept_start = (Button) findViewById(R.id.accept_start);
         start_row = (EditText) findViewById(R.id.start_row);
         start_col = (EditText) findViewById(R.id.start_col);
-
-        /* Per il print di tutto il campo */
-        printMatrix = findViewById(R.id.printcampo);
 
         try {
             /* Connessione al Robot */
@@ -838,11 +832,7 @@ public class Task1 extends AppCompatActivity {
     int azione = 0;
     int highest_visited = 1;
     int ultima_bomba = 1;
-
-    int[][] print_matrix = new int[ROW][COL]; // contiene 1 dove ho trovato una mina, 0 altrimenti
-
     ArrayList<Pair> lista_bombe = new ArrayList<>();
-
     /* programma effettivo */
     private void complete_task1(EV3.Api api) {
 
@@ -864,9 +854,6 @@ public class Task1 extends AppCompatActivity {
             m.waitUntilReady();
         });
 
-        print_matrix[this.my_row][this.my_col] = 1;
-        printaCampo();
-
 
         while(tot_balls > 0){
             log.append("\nazione da fare: " + azione);
@@ -885,10 +872,6 @@ public class Task1 extends AppCompatActivity {
                 });
                 tot_balls--;
                 azione = 2;
-
-                print_matrix[this.my_row][this.my_col] = 1;
-                printaCampo();
-
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
@@ -912,16 +895,7 @@ public class Task1 extends AppCompatActivity {
         for(int i = 0; i < lista_bombe.size(); i++){
             log.append(lista_bombe.get(i).first + " " + lista_bombe.get(i).second + "\n,l");
         }
-    }
 
 
-    private void printaCampo () {
-
-        for (int i = 0; i < ROW; i++) {
-            for (int j = 0; j < COL; j++) {
-                printMatrix.append("|" +  print_matrix[i][j] + "|");
-            }
-            printMatrix.append("\n");
-        }
     }
 }
