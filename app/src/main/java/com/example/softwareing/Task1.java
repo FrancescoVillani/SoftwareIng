@@ -703,6 +703,7 @@ public class Task1 extends AppCompatActivity {
         if(read_proximity_sensor() <= 7){
 
             this.ultima_bomba = this.campo[this.my_row][this.my_col];
+            log.append("mina trovata alla casella di valore: " + ultima_bomba);
 
             /* usa il motore di raccolta */
             applyMotorFunctional((m) -> {
@@ -751,29 +752,28 @@ public class Task1 extends AppCompatActivity {
 
     private int  algoritmo_ritorno_casella(){
         if (campo[my_row][my_col] == ultima_bomba){
-            log.append("mina trovata alla casella di valore: " + ultima_bomba);
             return capisci_mossa(my_row, my_col);
         }
         else{
             int max_row = this.my_row, max_col = this.my_col;
 
             int startPosX = (this.my_row - 1 < 0) ? this.my_row : this.my_row-1;
-            if(campo[startPosX][my_col] > campo[max_row][max_col] && campo[startPosX][my_col] <= highest_visited){
+            if(campo[startPosX][my_col] > campo[max_row][max_col] && campo[startPosX][my_col] <= ultima_bomba){
                 max_row = startPosX;
                 max_col = my_col;
             }
             int startPosY = (this.my_col - 1 < 0) ? this.my_col : this.my_col-1;
-            if(campo[my_row][startPosY] > campo[max_row][max_col] && campo[my_row][startPosY] <= highest_visited){
+            if(campo[my_row][startPosY] > campo[max_row][max_col] && campo[my_row][startPosY] <= ultima_bomba){
                 max_row = my_row;
                 max_col = startPosY;
             }
             int endPosX =   (this.my_row + 1 > this.ROW-1) ? this.my_row : this.my_row+1;
-            if(campo[endPosX][my_col] > campo[max_row][max_col] && campo[endPosX][my_col] <= highest_visited){
+            if(campo[endPosX][my_col] > campo[max_row][max_col] && campo[endPosX][my_col] <= ultima_bomba){
                 max_row = endPosX;
                 max_col = my_col;
             }
             int endPosY =   (this.my_col + 1 > this.COL-1) ? this.my_col : this.my_col+1;
-            if(campo[my_row][endPosY] > campo[max_row][max_col] && campo[my_row][endPosY] <= highest_visited){
+            if(campo[my_row][endPosY] > campo[max_row][max_col] && campo[my_row][endPosY] <= ultima_bomba){
                 max_row = my_row;
                 max_col = endPosY;
             }
