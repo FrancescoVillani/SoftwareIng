@@ -525,6 +525,11 @@ public class Task1 extends AppCompatActivity {
     /* Capisce com'è in base alla destinazione e ritorna la mossa da fare*/
     private int capisci_mossa(int row_dest, int col_dest) {
         int mov;
+        if(row_dest == my_row && col_dest == my_col){
+            mov = -1; // row_dest e' a NORD
+            log.append("\nla mossa da fare è: " + mov + " ");
+            return mov;
+        }
         if (row_dest < this.my_row) {
             mov = (int) mod(0 - this.orientamento, 4); // row_dest e' a NORD
             log.append("\nla mossa da fare è: " + mov + " ");
@@ -549,9 +554,9 @@ public class Task1 extends AppCompatActivity {
 
     private void registra_movimento(){
         if (orientamento == 0)
-            my_row++;
-        else if(orientamento == 2)
             my_row--;
+        else if(orientamento == 2)
+            my_row++;
         else if(orientamento == 1)
             my_col++;
         else
@@ -561,7 +566,8 @@ public class Task1 extends AppCompatActivity {
     }
 
     private void esegui_mossa(EV3.Api api, int mossa){
-        if(mossa == 0){
+        if(mossa==-1){}
+        else if(mossa == 0){
             casella_avanti(api);
             registra_movimento();
         }
@@ -583,11 +589,39 @@ public class Task1 extends AppCompatActivity {
         }
     }
 
-    void algoritmo_zigzag(EV3.Api api){ }
+    private int algoritmo_zigzag(){
+        int next_row = this.my_row, next_col = this.my_col;
 
-    void algoritmo_ritorno_inizio(EV3.Api api){}
+        int startPosX = (this.my_row - 1 < 0) ? this.my_row : this.my_row-1;
+        if(campo[startPosX][my_col] == campo[my_row][my_col]+1){
+            next_row = startPosX;
+            next_col = my_col;
+        }
+        int startPosY = (this.my_col - 1 < 0) ? this.my_col : this.my_col-1;
+        if(campo[my_row][startPosY]  == campo[my_row][my_col]+1){
+            next_row = my_row;
+            next_col = startPosY;
+        }
+        int endPosX =   (this.my_row + 1 > this.ROW-1) ? this.my_row : this.my_row+1;
+        if(campo[endPosX][my_col]  == campo[my_row][my_col]+1){
+            next_row = endPosX;
+            next_col = my_col;
+        }
+        int endPosY =   (this.my_col + 1 > this.COL-1) ? this.my_col : this.my_col+1;
+        if(campo[my_row][endPosY]  == campo[my_row][my_col]+1){
+            next_row = my_row;
+            next_col = endPosY;
+        }
+            return capisci_mossa(next_row, next_col);
 
-    void  algoritmo_ritorno_casella(EV3.Api api){}
+
+    }
+
+    void algoritmo_ritorno_inizio(){
+
+    }
+
+    void  algoritmo_ritorno_casella(){}
 
 
     /*------------------------------------ALGORITMI VARI-----------------------------------------*/
@@ -601,13 +635,13 @@ public class Task1 extends AppCompatActivity {
 
         while(tot_balls > 0){
             if(azione == 0){
-                algoritmo_zigzag(api);
+                esegui_mossa(api, algoritmo_zigzag());
             }
             else if(azione == 1){
-                algoritmo_ritorno_inizio(api);
+                algoritmo_ritorno_inizio();
             }
             else{
-                algoritmo_ritorno_casella(api);
+                algoritmo_ritorno_casella();
             }
         }
 
