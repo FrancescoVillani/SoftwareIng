@@ -556,26 +556,47 @@ public class Task1 extends AppCompatActivity {
 
             azione = (azione + 1) % 3;
             log.append("\nla mossa da fare è: " + mov + " ");
+            if(azione == -1){
+                azione = 2;
+                return mov;
+            }
             return mov;
+
         }
         if (row_dest < this.my_row) {
             mov = (int) mod(0 - this.orientamento, 4); // row_dest e' a NORD
             log.append("\nla mossa da fare è: " + mov + " ");
+            if(azione == -1){
+                azione = 2;
+                return mov;
+            }
             return mov;
         }
         else if (row_dest > this.my_row) {
             mov = (int) mod( 2 - this.orientamento ,4); // row_dest e' a SUD
             log.append("\nla mossa da fare è: " + mov + " ");
+            if(azione == -1){
+                azione = 2;
+                return mov;
+            }
             return mov;
         }
         else if (col_dest > this.my_col) {
             mov = (int) mod(1 - this.orientamento,4); // col_dest e' a EST
             log.append("\nla mossa da fare è: " + mov + " ");
+            if(azione == -1){
+                azione = 2;
+                return mov;
+            }
             return mov;
         }
         else{
             mov = (int) mod(3 - this.orientamento,4); // col_dest e' a OVEST
             log.append("\nla mossa da fare è: " + mov + " ");
+            if(azione == -1){
+                azione = 2;
+                return mov;
+            }
             return mov;
         }
     }
@@ -592,6 +613,23 @@ public class Task1 extends AppCompatActivity {
         log.append("\nsono in posizione: " + my_row + " " + my_col);
 
     }
+
+    private void esegui_giramento(EV3.Api api, int mossa){
+        if(mossa==-1){}
+        else if(mossa == 0){
+        }
+        else if(mossa == 1){
+            rotazione_plus_90(api);
+        }
+        else if(mossa == 2){
+            rotazione_plus_90(api);
+            rotazione_plus_90(api);
+        }
+        else{
+            rotazione_minus_90(api);
+        }
+    }
+
 
     private void esegui_mossa(EV3.Api api, int mossa){
         if(mossa==-1){}
@@ -662,6 +700,24 @@ public class Task1 extends AppCompatActivity {
         }
         highest_visited++;
         log.append("\nhighest visited is now: " + highest_visited);
+        if(read_proximity_sensor() <= 7){
+
+            this.ultima_bomba = this.campo[this.my_row][this.my_col];
+
+            /* usa il motore di raccolta */
+            applyMotorFunctional((m) -> {
+                m.waitCompletion();
+                m.waitUntilReady();
+
+                m.setTimeSpeed(100,200,500,200, true);
+                m.start();
+
+                m.waitCompletion();
+                m.waitUntilReady();
+            });
+
+            return capisci_mossa(my_row, my_col);
+        }
         return capisci_mossa(next_row, next_col);
     }
 
@@ -695,6 +751,7 @@ public class Task1 extends AppCompatActivity {
 
     private int  algoritmo_ritorno_casella(){
         if (campo[my_row][my_col] == ultima_bomba){
+            log.append("mina trovata alla casella di valore: " + ultima_bomba);
             return capisci_mossa(my_row, my_col);
         }
         else{
@@ -724,7 +781,33 @@ public class Task1 extends AppCompatActivity {
         }
     }
 
+    public int rilascia_bomba(){
 
+        int out_row = this.my_row, out_col = this.my_col;
+
+        int startPosX = (this.my_row - 1 >= 0) ? this.my_row : this.my_row-1;
+        if(startPosX < 0){
+            out_row = startPosX;
+            out_col = my_col;
+        }
+        int startPosY = (this.my_col - 1 >= 0) ? this.my_col : this.my_col-1;
+        if(startPosY < 0){
+            out_row = my_row;
+            out_col = startPosY;
+        }
+        int endPosX =   (this.my_row + 1 <= this.ROW-1) ? this.my_row : this.my_row+1;
+        if(endPosX > this.ROW-1){
+            out_row = endPosX;
+            out_col = my_col;
+        }
+        int endPosY =   (this.my_col + 1 <= this.COL-1) ? this.my_col : this.my_col+1;
+        if(endPosY > this.COL-1){
+            out_row = my_row;
+            out_col = endPosY;
+        }
+        return capisci_mossa(out_row, out_col);
+
+    }
     /*------------------------------------ALGORITMI VARI-----------------------------------------*/
 
     int azione = 0;
@@ -732,6 +815,9 @@ public class Task1 extends AppCompatActivity {
     int ultima_bomba = 1;
     /* programma effettivo */
     private void complete_task1(EV3.Api api) {
+        highest_visited = 1;
+        ultima_bomba = 1;
+        azione = 0;
         setCampo();
         resetGiroscope();
 
@@ -740,7 +826,7 @@ public class Task1 extends AppCompatActivity {
             m.waitCompletion();
             m.waitUntilReady();
 
-            m.setTimeSpeed(-100,200,500,200, true);
+            m.setTimeSpeed(-100,200,200,200, true);
             m.start();
 
             m.waitCompletion();
@@ -749,17 +835,38 @@ public class Task1 extends AppCompatActivity {
 
 
         while(tot_balls > 0){
+            log.append("\nazione da fare: " + azione);
             if(azione == -1){
-                //rilascia_bomba();
+                esegui_giramento(api, rilascia_bomba());
+                /* usa il motore di raccolta */
+                applyMotorFunctional((m) -> {
+                    m.waitCompletion();
+                    m.waitUntilReady();
+
+                    m.setTimeSpeed(-100,200,200,200, true);
+                    m.start();
+
+                    m.waitCompletion();
+                    m.waitUntilReady();
+                });
+                tot_balls--;
+                azione = 2;
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                azione = 2;
+
             }
-            if(azione == 0){
+            else if(azione == 0){
                 esegui_mossa(api, algoritmo_zigzag());
             }
             else if(azione == 1){
                 esegui_mossa(api, algoritmo_ritorno_inizio());
             }
             else{
-                algoritmo_ritorno_casella();
+                esegui_mossa(api, algoritmo_ritorno_casella());
             }
         }
 
