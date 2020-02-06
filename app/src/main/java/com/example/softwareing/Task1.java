@@ -21,6 +21,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import it.unive.dais.legodroid.lib.EV3;
 import it.unive.dais.legodroid.lib.GenEV3;
@@ -158,6 +160,25 @@ public class Task1 extends AppCompatActivity {
             e.printStackTrace();
             Log.i("error", "LA PRIMA SLEEP è STRONZA");
         }
+    }
+
+    /* Ritorna la distanza letta dal proximity sensor*/
+    private float read_proximity_sensor () {
+
+        /* interroga sensore di prossimità */
+        Future<Float> future_distance = null;
+        Float distance = (float) 0;
+        try {
+
+            future_distance = proximity_sensor.getDistance();
+            distance = future_distance.get();
+
+        } catch (IOException | InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        /* se distance <= 5 allora la pallina si puo raccogliere */
+        return distance;
     }
     /*-----------------------------NOT IMPORTANT--------------------------------------------*/
 
@@ -527,6 +548,12 @@ public class Task1 extends AppCompatActivity {
         int mov;
         if(row_dest == my_row && col_dest == my_col){
             mov = -1;
+
+            if((read_proximity_sensor() <= 7 || read_proximity_sensor() >= 80)&& azione == 1){
+                azione = -1;
+                return -1;
+            }
+
             azione = (azione + 1) % 3;
             log.append("\nla mossa da fare è: " + mov + " ");
             return mov;
@@ -592,7 +619,24 @@ public class Task1 extends AppCompatActivity {
 
     private int algoritmo_zigzag(){
 
+        if(read_proximity_sensor() <= 7){
 
+            this.ultima_bomba = this.campo[this.my_row][this.my_col];
+
+            /* usa il motore di raccolta */
+            applyMotorFunctional((m) -> {
+                m.waitCompletion();
+                m.waitUntilReady();
+
+                m.setTimeSpeed(100,200,500,200, true);
+                m.start();
+
+                m.waitCompletion();
+                m.waitUntilReady();
+            });
+
+            return capisci_mossa(my_row, my_col);
+        }
 
         int next_row = this.my_row, next_col = this.my_col;
 
@@ -622,6 +666,7 @@ public class Task1 extends AppCompatActivity {
     }
 
     private int algoritmo_ritorno_inizio(){
+
         int min_row = this.my_row, min_col = this.my_col;
 
         int startPosX = (this.my_row - 1 < 0) ? this.my_row : this.my_row-1;
@@ -690,15 +735,28 @@ public class Task1 extends AppCompatActivity {
         setCampo();
         resetGiroscope();
 
+        /*apri la pinza*/
+        applyMotorFunctional((m) -> {
+            m.waitCompletion();
+            m.waitUntilReady();
+
+            m.setTimeSpeed(-100,200,500,200, true);
+            m.start();
+
+            m.waitCompletion();
+            m.waitUntilReady();
+        });
+
+
         while(tot_balls > 0){
             if(azione == -1){
-
+                //rilascia_bomba();
             }
             if(azione == 0){
                 esegui_mossa(api, algoritmo_zigzag());
             }
             else if(azione == 1){
-                esegui_mossa(api, algoritmo_ritorno_inizio());;
+                esegui_mossa(api, algoritmo_ritorno_inizio());
             }
             else{
                 algoritmo_ritorno_casella();
