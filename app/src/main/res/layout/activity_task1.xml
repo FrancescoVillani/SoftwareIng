@@ -22,10 +22,4 @@
 
     <include layout="@layout/content_task1" />
 
-    <TextView
-        android:id="@+id/text_printMatrix"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView" />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
