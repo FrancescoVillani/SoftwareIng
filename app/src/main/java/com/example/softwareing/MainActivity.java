@@ -17,22 +17,35 @@ import android.widget.Button;
 public class MainActivity extends AppCompatActivity {
 
     private Button task1;
+    private Button task2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         task1 = findViewById(R.id.task1);
+        task2 = findViewById(R.id.task2);
         task1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openTask1();
             }
         });
+        task2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openTask2();
+            }
+        });
     }
 
     private void openTask1(){
         Intent intent = new Intent(this, Task1.class);
+        startActivity(intent);
+    }
+
+    private void openTask2(){
+        Intent intent = new Intent(this, Task2.class);
         startActivity(intent);
     }
 

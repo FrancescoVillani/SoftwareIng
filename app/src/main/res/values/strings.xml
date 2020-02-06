@@ -2,4 +2,9 @@
     <string name="app_name">SoftwareIng</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_task1">Task1</string>
+    <string name="title_activity_task2">Task2</string>
+    <string name="check">check</string>
+    <string name="connectionFailed">Connessione Fallita</string>
+    <string name="connectionSuccess">Connessione riuscita</string>
+    <string name="error_missing_permissions">Cannot start without required permissions</string>
 </resources>
